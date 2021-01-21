@@ -1,0 +1,7 @@
+<form [formGroup]='joinForm' >
+
+  <label for="name">Name</label>
+  <input type="text" formControlName='name'>
+  <button type="button" (click)="onButtonClick()" [disabled]="joinForm.invalid">{{buttonWording}}</button>
+
+</form>
