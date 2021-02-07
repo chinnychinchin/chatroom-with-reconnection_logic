@@ -1,10 +1,20 @@
+export interface ChatMsg {
+
+    from: string
+    msg: string
+    time: Date
+
+}
+
+
+
 import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
 
 @Injectable()
 export class ChatSvc {
 
-    event = new Subject()
+    event = new Subject<ChatMsg>()
     sock: WebSocket
     SOCKETENDPOINT = 'ws://localhost:3000/chat' 
     buttonWording = "Join"
@@ -18,8 +28,9 @@ export class ChatSvc {
 
         //Handles message events
         this.sock.onmessage = (payload) => { 
-            console.log(payload.data)
-            this.event.next(payload.data)
+
+            const msg = JSON.parse(payload.data) as ChatMsg
+            this.event.next(msg)
 
         }
 
@@ -53,6 +64,9 @@ export class ChatSvc {
 
     }
 
+    sendMsg(msg) {
+        this.sock.send(msg)
+    }
 
 
 }

@@ -17,6 +17,16 @@ app.use(morgan('combined'));
 //
 const ROOM = [];
 
+const mkMsg = (msg, name) => {
+
+    return JSON.stringify({
+        from: name,
+        msg, 
+        time: new Date()
+    })
+
+}
+
 //configure routes
 
 //websocket endpoint
@@ -27,17 +37,18 @@ app.ws('/chat/:name', (ws, req) => {
     ROOM.push({name, ws});
     //send a message to all participants about new participant joining
     for (const p of ROOM) {
-   
-        p.ws.send(`${name} has joined the chat`)
+        
+        const msg = mkMsg(`${name} has joined the chat`, "Server")
+        p.ws.send(msg)
 
     }
 
     ws.on('message', (payload) => {
 
-        console.log(`payload: ${payload}`)
+        const msg = mkMsg(payload, name)
         for (let p of ROOM) {
          
-            p.ws.send(payload)
+            p.ws.send(msg)
     
         }
     

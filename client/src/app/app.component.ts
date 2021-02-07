@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ChatSvc } from './chat.service';
+import { Subscription } from 'rxjs';
+import { ChatMsg, ChatSvc } from './chat.service';
+import { faPaperPlane, faSmile, faPaperclip } from "@fortawesome/free-solid-svg-icons";
 
 @Component({
   selector: 'app-root',
@@ -11,23 +13,40 @@ export class AppComponent {
   title = 'client';
   joinForm: FormGroup
   buttonWording
+  participant = null
+  $event: Subscription
+  messages: ChatMsg [] = []
+  faPaperPlane = faPaperPlane; faSmile = faSmile; faPaperClip = faPaperclip;
 
   constructor(private fb: FormBuilder, private chatSvc: ChatSvc) {}
 
   ngOnInit() :void {
 
-    this.joinForm = this.fb.group({name: this.fb.control('', [Validators.required])})
     this.buttonWording = this.chatSvc.buttonWording
+    this.joinForm = this.fb.group({name: this.fb.control('', [Validators.required]), message: this.fb.control("")})
+    this.$event
+  }
+
+  ngOnDestroy() :void {
+
+    this.chatSvc.event.unsubscribe();
+
   }
 
 
   onButtonClick() {
 
     const name = this.joinForm.value.name;
+    this.participant = name;
     if(this.buttonWording.toLowerCase() == "join") {
 
       this.chatSvc.join(name)
       this.buttonWording = this.chatSvc.buttonWording
+      this.chatSvc.event.subscribe((message => { 
+  
+        this.messages.push(message)
+
+      }))
 
     }
 
@@ -38,6 +57,14 @@ export class AppComponent {
     }
    
 
+  }
+
+
+  sendMsg() {
+
+    const message = this.joinForm.get("message").value
+    this.joinForm.get("message").reset()
+    this.chatSvc.sendMsg(message)
   }
 
 
